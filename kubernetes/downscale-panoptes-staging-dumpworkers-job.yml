@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: downscale-panoptes-staging-dumpworkers-job
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: downscaler-staging
+        spec:
+          containers:
+          - name: downscaler-staging
+            image: ghcr.io/zooniverse/downscaler
+            env:
+            - name: DEPLOYMENT_NAME
+              value: panoptes-staging-sidekiq-dumpworker
+            - name: REDIS_URL
+              value: redis://panoptes-staging-redis:6379/0
+            volumeMounts:
+              - name: kubeconfig
+                mountPath: "/root/.kube/config"
+                readOnly: true
+            command: ['ruby', 'downscale.rb']
+          volumes:
+          - name: kubeconfig
+            secret:
+              secretName: downscaler-kubeconfig
+          restartPolicy: Never
+      backoffLimit: 2
