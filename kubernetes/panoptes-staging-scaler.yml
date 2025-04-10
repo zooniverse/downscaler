@@ -1,0 +1,27 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: panoptes-staging-sidekiq-dumpworker-scaler
+  namespace: default
+spec:
+  scaleTargetRef:
+    name: panoptes-staging-sidekiq-dumpworker
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 20
+        scaleDown:
+          policies: []
+          selectPolicy: Disabled  # Disable all scaling down
+  triggers:
+  - type: redis
+    metadata:
+      address: "panoptes-staging-redis.default.svc.cluster.local:6379"
+      listName: "queue:dumpworker"
+      listLength: "10"
