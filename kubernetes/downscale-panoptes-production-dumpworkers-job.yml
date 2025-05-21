@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: downscale-panoptes-production-dumpworkers-job
+spec:
+  # Check every 10 minutes
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          name: downscaler-production
+        spec:
+          containers:
+          - name: downscaler-production
+            image: ghcr.io/zooniverse/downscaler:latest
+            command: ["/bin/bash"]
+            args: ["-c", "ruby downscale.rb"]
+            env:
+            - name: DEPLOYMENT_NAME
+              value: panoptes-production-sidekiq-dumpworker
+            - name: REDIS_URL
+              value: redis://panoptes-production-redis:6379/0
+            - name: MINIMUM_PODS
+              value: '0'
+            volumeMounts:
+            - name: kubectl-config
+              mountPath: "/root/.kube"
+              readOnly: true
+          volumes:
+          - name: kubectl-config
+            secret:
+              secretName: downscaler-kubeconfig
+              items:
+              - key: kubeconfig
+                path: config
+          restartPolicy: Never
