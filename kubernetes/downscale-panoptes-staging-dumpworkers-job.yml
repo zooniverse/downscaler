@@ -12,7 +12,7 @@ spec:
         spec:
           containers:
           - name: downscaler-staging
-            image: ghcr.io/zooniverse/downscaler
+            image: ghcr.io/zooniverse/downscaler:latest
             env:
             - name: DEPLOYMENT_NAME
               value: panoptes-staging-sidekiq-dumpworker
