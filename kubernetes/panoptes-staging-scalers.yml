@@ -25,15 +25,15 @@ metadata:
 spec:
   scaleTargetRef:
     name: panoptes-staging-sidekiq-dumpworker
-  minReplicaCount: 1
-  maxReplicaCount: 6
+  minReplicaCount: 0
+  maxReplicaCount: 5
   advanced:
     horizontalPodAutoscalerConfig:
       behavior:
         scaleUp:
           policies:
             - type: Pods
-              value: 2
+              value: 1
               periodSeconds: 20
         scaleDown:
           selectPolicy: Disabled  # Disable all scaling down
