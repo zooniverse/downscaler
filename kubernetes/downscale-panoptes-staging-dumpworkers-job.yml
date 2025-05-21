@@ -3,7 +3,8 @@ kind: CronJob
 metadata:
   name: downscale-panoptes-staging-dumpworkers-job
 spec:
-  schedule: "*/10 * * * *"
+  # Every two minutes for testing
+  schedule: "*/2 * * * *"
   jobTemplate:
     spec:
       template:
@@ -13,6 +14,8 @@ spec:
           containers:
           - name: downscaler-staging
             image: ghcr.io/zooniverse/downscaler:latest
+            command: ["/bin/bash"]
+            args: ["-c", "ruby downscale.rb"]
             env:
             - name: DEPLOYMENT_NAME
               value: panoptes-staging-sidekiq-dumpworker
@@ -20,11 +23,10 @@ spec:
               value: redis://panoptes-staging-redis:6379/0
             - name: MINIMUM_PODS
               value: '0'
-              volumeMounts:
-              - name: kubectl-config
-                mountPath: "/root/.kube"
-                readOnly: true
-            command: ['ruby', 'downscale.rb']
+            volumeMounts:
+            - name: kubectl-config
+              mountPath: "/root/.kube"
+              readOnly: true
           volumes:
           - name: kubectl-config
             secret:
@@ -33,4 +35,3 @@ spec:
               - key: kubeconfig
                 path: config
           restartPolicy: Never
-      backoffLimit: 2
