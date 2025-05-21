@@ -18,7 +18,11 @@ if pod_count_status.exitstatus > 0
   exit
 end
 
-if idle_dumpworkers.count > 0 && pod_count.to_i > 1
+if idle_dumpworkers.count.zero?
+  puts 'No idle dumpworkers to scale'
+elsif pod_count.to_i == ENV.fetch('MINIMUM_PODS').to_i
+  puts 'Already scaled to minimum pods'
+else
   killable_pod_name = idle_dumpworkers[0]['hostname']
   kill_cmd = "kubectl delete pod #{killable_pod_name}"
   kill_output, kill_stderr = Open3.capture3(kill_cmd)
@@ -28,6 +32,4 @@ if idle_dumpworkers.count > 0 && pod_count.to_i > 1
   scale_cmd = "kubectl scale deployment #{ENV.fetch('DEPLOYMENT_NAME')} --replicas=#{new_desired_pod_count}"
   scale_output, scale_stderr = Open3.capture3(scale_cmd)
   puts scale_output || scale_stderr
-elsif idle_dumpworkers.count.zero?
-  puts 'No idle dumpworkers to scale'
 end
