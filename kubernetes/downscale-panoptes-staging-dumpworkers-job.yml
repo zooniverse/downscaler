@@ -18,14 +18,19 @@ spec:
               value: panoptes-staging-sidekiq-dumpworker
             - name: REDIS_URL
               value: redis://panoptes-staging-redis:6379/0
-            volumeMounts:
-              - name: kubeconfig
-                mountPath: "/root/.kube/config"
+            - name: MINIMUM_PODS
+              value: '0'
+              volumeMounts:
+              - name: kubectl-config
+                mountPath: "/root/.kube"
                 readOnly: true
             command: ['ruby', 'downscale.rb']
           volumes:
-          - name: kubeconfig
+          - name: kubectl-config
             secret:
               secretName: downscaler-kubeconfig
+              items:
+              - key: kubeconfig
+                path: config
           restartPolicy: Never
       backoffLimit: 2
