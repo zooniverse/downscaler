@@ -10,12 +10,20 @@ spec:
   minReplicaCount: 1
   maxReplicaCount: 16
   pollingInterval: 60
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          policies:
+            - type: Pods
+              value: 2
+              periodSeconds: 20
   triggers:
   - type: redis
     metadata:
       address: "panoptes-production-redis.default.svc.cluster.local:6379"
       listName: "queue:default"
-      listLength: "50"
+      listLength: "25"
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -26,7 +34,7 @@ spec:
   scaleTargetRef:
     name: panoptes-production-sidekiq-dumpworker
   minReplicaCount: 1
-  maxReplicaCount: 5
+  maxReplicaCount: 6
   advanced:
     horizontalPodAutoscalerConfig:
       behavior:
@@ -42,4 +50,4 @@ spec:
     metadata:
       address: "panoptes-production-redis.default.svc.cluster.local:6379"
       listName: "queue:dumpworker"
-      listLength: "10"
+      listLength: "1"
